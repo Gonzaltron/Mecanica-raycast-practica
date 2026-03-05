@@ -9,6 +9,7 @@ public class barcoPlano : MonoBehaviour
     Vector3 uno;
     Vector3 dos;
     Vector3 normal;
+    Rigidbody rb;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -27,6 +28,6 @@ public class barcoPlano : MonoBehaviour
         Vector3.Normalize(uno);
         Vector3.Normalize(dos);
         normal = new Vector3(Mathf.Sqrt(uno.x * uno.x + dos.x * dos.x), Mathf.Sqrt(uno.y * uno.y + dos.y * dos.y), Mathf.Sqrt(uno.z * uno.z + dos.z * dos.z));
-
+        rb.AddTorque(normal * torque, ForceMode Force);
     }
 }
