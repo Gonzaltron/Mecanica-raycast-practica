@@ -1,43 +1,85 @@
+using NUnit.Framework;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
-using UnityEngine.UIElements;
-
+[RequireComponent(typeof(LineRenderer))]
 public class onda : MonoBehaviour
 {
-    float initT;
-    float initPos;
-    [SerializeField] float amplitude;
-    [SerializeField] float anchura;
-    [SerializeField] float strength;
-    float pos;
-    float pos1;
-    float pos2;
+    [SerializeField] int nPoints = 100;
+    [SerializeField] float length = 10.0f;
+    [SerializeField] float amplitude = 1.0f;
+    [SerializeField] float waveLenght = 5.0f;
+    [SerializeField] float waveSpeed = 3f;
+    [SerializeField] float damping = 0.15f;
+    [SerializeField] KeyCode emitKey = KeyCode.Space;
+    [SerializeField] Transform emitPoint;
     LineRenderer lineRenderer;
-    int points = 100;
-    float e = 2.71828f;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    struct Pulse
+    {
+        public float originX;
+        public float startTime;
+        public float amplitude;
+        public float width;
+    }
+    List<Pulse> pulseList = new List<Pulse>();
+    // Start is called once before the first execution of Update after the
     void Start()
     {
         lineRenderer = GetComponent<LineRenderer>();
-        lineRenderer.positionCount = points;
+        if (nPoints < 2) nPoints = 2;
+        lineRenderer.positionCount = nPoints;
     }
-
     // Update is called once per frame
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(emitKey))
         {
-            pos += strength;
-            initPos = pos;
-            initT = Time.time;
-            for (int i = 0; i < points; i++)
+            EmitPulse();
+        }
+        DrawWave();
+    }
+    void EmitPulse()
+    {
+        Pulse p = new Pulse
+        {
+            originX = 0,
+            startTime = Time.time,
+            amplitude = amplitude,
+            width = waveLenght
+        };
+        pulseList.Add(p);
+    }
+    void DrawWave()
+    {
+        float startX = -length * 0.5f;
+        float step = length / (nPoints - 1);
+        float currentTime = Time.time;
+        for (int i = 0; i < nPoints; i++)
+        {
+            float x = startX + i * step;
+            float y = 0.0f;
+            for (int j = 0; j < pulseList.Count; j++)
             {
-                float x = initPos + (i * amplitude);
-                pos1 += Mathf.Pow(e, pos1 - initPos/ anchura * 2);
-                pos2 -= Mathf.Pow(e, pos1 - initPos/ anchura * 2);
-                lineRenderer.SetPosition(i, new Vector3(x, pos1, 0));
-                lineRenderer.SetPosition(i, new Vector3(-x, pos2, 0));
+                Pulse p = pulseList[j];
+                float age = currentTime - p.startTime;
+                if (age < 0)
+                {
+                    continue;
+                }
+                float distRecorrida = age * waveSpeed;
+                y += EvaluatePulse(x, p.originX + distRecorrida, amplitude, p.width,
+                age);
+                y += EvaluatePulse(x, p.originX - distRecorrida, amplitude,
+                p.width, age);
             }
+            lineRenderer.SetPosition(i, new Vector3(x, y, 0f));
         }
     }
+    float EvaluatePulse(float x, float center, float amplitude, float width, float
+    age)
+    {
+        float dist = x - center;
+        float gaussian = Mathf.Exp(-(dist * dist) / (2f * width * width));
+        return amplitude * gaussian;
+    }
 }
+
