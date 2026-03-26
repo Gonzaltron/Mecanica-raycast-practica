@@ -284,7 +284,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b05790d7553ccaf43b7953089dbd35e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lados: 100
+  lados: 10
   cubos: {fileID: 6546076214586059708, guid: 603ef9a4cf6eaf344ae6d7b685488462, type: 3}
   amplitud: 4
   frequency: 0
